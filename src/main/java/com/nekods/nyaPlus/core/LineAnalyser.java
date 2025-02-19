@@ -345,22 +345,32 @@ public class LineAnalyser {
                             loop_marks.pop();  //条件达成了，跑完了，弹出栈。
                         }
                     }
-
-
                 } else {
 
                     if (ifLevel != 0 || loopLevel != 0) {  //还在掠过,直接跳了
                     } else {
+                        if (line.equals("返回")) {   //单独处理返回语句
+                            finalSend(sb.toString());
+                            return;
+                        }
                         sb.append(analyze(line));
                     }
 
                 }
             }
-            Controller.getOUTPUTTER().send(sb.toString()
-                    .replace("\\n", "\n")
-                    .replace("\\r", "\r"), task);   //权益之举
+            finalSend(sb.toString());
         } catch (NyaPlusException e) {
             throw e.setLine(i + 1);
         }
+    }
+
+    /**
+     * 处理结束之后可以统一通过这里输出
+     * @param s 要输出的内容
+     * */
+    private void finalSend(String s){
+        Controller.getOUTPUTTER().send(s
+                .replace("\\n", "\n")
+                .replace("\\r", "\r"), task);  //先这么写着
     }
 }

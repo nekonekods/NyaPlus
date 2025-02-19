@@ -9,6 +9,8 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+//其实这一段都是从网上copy来的，BoolExprAnalyser也是基于这个改造的，用的就是最传统的转化成后缀表达式的方法，比较好理解的。
+
 abstract class OperationAnalyser {
 
 

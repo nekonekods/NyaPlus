@@ -130,7 +130,8 @@ public abstract class BoolExprAnalyser {
 //                System.out.println("数字栈：" + number);
             }
         }
-        return number.pop();
+        return number.size() == 1 ? number.pop() : 'f';   //防止直接写ttttfffft这种玩意导致最后一个决定所有这种莫名其妙的问题
+                                                            //不说其他的，先堵上
     }
 
 

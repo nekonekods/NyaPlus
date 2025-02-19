@@ -16,6 +16,8 @@ public class VarManager {
 
     public VarManager() {
     }
+    //todo 为避免歧义，命名变量时，不能使用`%`符号，应当添加检查！！！
+    //tm写文档写一半想起来的
 
     public void setGlobalVar(String name, Object value) {
         if (this.Vars.containsKey(name)) {
