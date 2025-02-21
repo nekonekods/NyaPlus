@@ -10,13 +10,13 @@ public abstract class BoolExprAnalyser {
 
     public static boolean analyze(String expression)  {
         try {
-            Matcher m = Pattern.compile("(((?<!\\d)-?\\d+(\\.\\d+)?)(>|<|<=|>=|!=)((?<!\\d)-?\\d+(\\.\\d+)?))|(([^&|]+)?(==)([^&|]+)?)").matcher(expression);
+            Matcher m = Pattern.compile("(((?<!\\d)-?\\d+(\\.\\d+)?)(>|<|<=|>=)((?<!\\d)-?\\d+(\\.\\d+)?))|(([^&|]*)?(==|!=)([^&|]*)?)").matcher(expression);
             while (m.find()) {
                 if (m.group(1) != null) {  //第一种情况
                     expression = expression.replace(m.group(1), calculate(m.group(2),m.group(4),m.group(5)));   //这些参数依赖于正则表达式，需注意
                 }else if (m.group(7) != null) {   //第二种情况
                     expression = expression.replace(m.group(7), calculate(m.group(8),m.group(9),m.group(10)));
-                }else {
+                }else{
                     throw new RuntimeException();
                 }
             }

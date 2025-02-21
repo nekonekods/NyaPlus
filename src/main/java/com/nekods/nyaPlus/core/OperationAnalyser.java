@@ -150,7 +150,7 @@ abstract class OperationAnalyser {
         }
 
         Double pop = number.pop();
-        return Math.abs(pop % 1) < 0.00001 /*是整数吗？*/? (int)Math.round(pop) + "" : pop + "";
+        return Math.abs(pop % 1) < 0.01 || Math.abs(pop % 1) > 0.99 /*是整数吗？*/? (int)Math.round(pop) + "" : pop + "";
     }
 
 

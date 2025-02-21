@@ -267,9 +267,10 @@ public class LineAnalyser {
 
     public String analyze(String line) {
         line = line.replaceFirst("##.*", "");
-        if (line == null) {//去掉注释之后如果是空的，就跳过
+        if (line.isBlank()) {//去掉注释之后如果是空的，就跳过
             return "";
         } else {
+            line = line.stripTrailing();  //忽略行末的空白字符，这样就可以让行注释和代码分开来，好看
             line = this.replaceWithVars(line);
             line = this.replaceWithJSON(line);
             line = this.replaceCalculation(line);
