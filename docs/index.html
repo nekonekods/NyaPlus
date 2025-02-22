@@ -21,14 +21,26 @@
         homepage: 'README.md',
         search: {
             paths: 'auto',
-            placeholder: '搜索',
-            noData: '找不到结果',
+            placeholder: '🔎搜索',
+            noData: '{{{(＞︿＜)}}}',
             depth: 3,
             maxAge: 86400000,
             hideOtherSidebarContent: true
+        },
+        copyCode: {
+            buttonText: '📋',
+            errorText: '❌',
+            successText: '( •̀ ω •́ )✧'
+        },
+
+        'flexible-alerts': {
+            //style: 'flat'
         }
     }
 </script>
+<script src="//cdn.jsdelivr.net/npm/docsify-copy-code"></script>
+<script src="//cdn.jsdelivr.net/npm/docsify/lib/plugins/search.min.js"></script>
 <script src="//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
+<script src="//cdn.jsdelivr.net/npm/docsify-plugin-flexible-alerts/dist/docsify-plugin-flexible-alerts.min.js"></script>
 </body>
 </html>
