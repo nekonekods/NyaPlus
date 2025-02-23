@@ -3,6 +3,7 @@ package com.nekods.nyaPlus.core;
 import com.nekods.nyaPlus.exceptions.*;
 import com.nekods.nyaPlus.smallTools.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Stack;
@@ -236,17 +237,38 @@ public class LineAnalyser {
                     int c = method.getParameterCount();
 
 
-                    try {
-                        String result = null;
-                        if (c == 0) {
-                            result = (String) method.invoke(null);
-                        } else {
 
+                        String result = null;
+                        //这下面有大量重复代码和大坨try/catch块，先这么写
+
+                        if (c == 0) {
+                            try {
+                                result = (String) method.invoke(null);
+                                //三种情况分开处理，虽然看起来有些繁琐，但是就得这样写
+                            } catch (IllegalArgumentException e) {
+                                throw new NyaIllegalArgumentNumException(funcSplited[0]);
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                        } else {
+                            Object[] params = Toolbox.splitStringByIndex(funcSplited[1],' ', c);
                             if (method.getParameterTypes()[0] == Task.class) {
-                                Object[] params = Toolbox.addToFirst(task, Toolbox.splitStringByIndex(funcSplited[1], ' ', c));
-                                result = (String) method.invoke(null, params);
+                                params = Toolbox.addToFirst(task, Toolbox.splitStringByIndex(funcSplited[1], ' ', c));
+                                try {
+                                    result = (String) method.invoke(null, params);
+                                } catch (IllegalArgumentException e) {
+                                    throw new NyaIllegalArgumentNumException(funcSplited[0], c,params.length - 1);
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
                             } else {
-                                result = (String) method.invoke(null, Toolbox.splitStringByIndex(funcSplited[1], ' ', c));
+                                try {
+                                    result = (String) method.invoke(null, params);
+                                } catch (IllegalArgumentException e) {
+                                    throw new NyaIllegalArgumentNumException(funcSplited[0], c,params.length);
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
                             }
                         }
                         if (result == null) {
@@ -255,9 +277,6 @@ public class LineAnalyser {
                         } else {
                             inputBuilder.replace(pair[0] - 1, pair[1] + 1, result);
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
                 }
             }
 

@@ -23,7 +23,7 @@ public class Toolbox {
 
     static private String getStringByIndex(String list,String index){
         int length = 0;
-        String result = null;
+        String result;
         try {
             if (list.charAt(0) == '{') {
                 JSONObject json = JSON.parseObject(list);
@@ -40,13 +40,12 @@ public class Toolbox {
             }else{
                 return result;
             }
-        /*}catch (NumberFormatException e){
-            throw new NyaArrayIndexParamException(index);*/
+        }catch (NumberFormatException e){
+            throw new NyaArrayIndexParamException(index);
         }catch (IndexOutOfBoundsException e){
             throw new NyaIndexOutOfBoundsException(Integer.parseInt(index),length,list);
-        }catch (RuntimeException e){
-            // throw new NyaInvalidJSONparamException(list);   //这个是给开头正确，内部错误的数组用的
-            throw e;
+        }catch (JSONException e){
+            throw new NyaInvalidJSONparamException(list);   //这个是给开头正确，内部错误的数组用的
         }
     }
 
@@ -188,7 +187,7 @@ public class Toolbox {
         try {
             JSON.parseObject(json);
             return true;
-        } catch (JSONException var2) {
+        } catch (JSONException e) {
             return false;
         }
     }
