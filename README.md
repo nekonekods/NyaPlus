@@ -10,6 +10,8 @@ NyaPlus是一套基于Java的中文编程框架，旨在让每个人都能实现
 
 ## 灵感来源
 语法借鉴QRspeed，计划准备实现两套语法，一套完全兼容QRspeed，一套在其基础上进行不考虑兼容的优化。
+## 文档
+[点我](https://nekonekods.github.io/NyaPlus/)
 
 ## 试着玩玩
 将源代码下载下来，运行maven的package命令之后，进入`have_a_try`目录下，运行`startHere.bat`即可。\
