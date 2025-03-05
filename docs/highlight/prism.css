@@ -1,0 +1,149 @@
+/* PrismJS 1.29.0
+https://prismjs.com/download.html#themes=prism-tomorrow&languages=clike+regex */
+
+code[class*=language-],
+pre[class*=language-] {
+    color: #ccc;
+    background: 0 0;
+/*'JetBrainsFont', serif*/
+    /*Consolas, Monaco, 'DengX','Andale Mono', 'Ubuntu Mono', monospace*/
+    font-family: Consolas, Monaco, 'DengX','Andale Mono', 'Ubuntu Mono', monospace;
+    font-size: 1em;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none
+}
+
+pre[class*=language-] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto
+}
+
+:not(pre)>code[class*=language-],
+pre[class*=language-] {
+    background: #2d2d2d
+}
+
+:not(pre)>code[class*=language-] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal
+}
+
+.token.block-comment,
+.token.cdata,
+.token.comment,
+.token.doctype,
+.token.prolog {
+    color: #b6b5b5
+}
+
+.token.punctuation {
+    color: #C76B29
+}
+
+.token.attr-name,
+.token.deleted,
+.token.namespace,
+.token.tag {
+    color: #e2777a
+}
+
+.token.function-name {
+    color: #6196cc
+}
+
+.token.boolean,
+.token.function{
+    color: #f08d49
+}
+
+.token.char_repeat{
+    color: #2AACB8
+}
+
+
+.token.class-name,
+.token.constant,
+.token.property,
+.token.symbol {
+    color: #ffbf00;
+    /*-webkit-text-stroke: 1px #ffdd00;*/
+}
+
+.token.atrule,
+.token.builtin,
+.token.important,
+.token.keyword,
+.token.selector {
+    color: #cb81d1
+}
+
+.token.attr-value,
+.token.char,
+.token.regex,
+.token.string,
+.token.variable {
+    color: #57bd74
+}
+
+/*.token.json_var{*/
+/*    color: #c35fdb*/
+/*}*/
+
+
+.token.entity,
+.token.operator,
+.token.url {
+    color: #67cdcc
+}
+
+.token.number {
+    color: #2f7c27
+}
+
+.token.bold,
+.token.important {
+    font-weight: 700
+}
+
+.token.italic {
+    font-style: italic
+}
+
+.token.entity {
+    cursor: help
+}
+
+.token.bool_op{
+    color: #f08d49;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
+.token.divider{
+    margin-right: 5px;
+}
+
+.token.compare_op{
+    color: #89bdff;
+}
+
+.token.quote{
+
+}
+
+.token.inserted {
+    color: green
+}
