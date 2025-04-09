@@ -14,6 +14,8 @@ import java.util.*;
 import java.util.regex.*;
 
 public class NyaThread extends Thread {
+    LineAnalyser lineAnalyser = new LineAnalyser();
+
     public NyaThread() {
     }
 
@@ -26,7 +28,7 @@ public class NyaThread extends Thread {
                task为主要媒介*/
 
         Queue<Task> taskQueue = ThreadPool.getINSTANCE().getTaskQueue();//不安全，不保证被初始化了
-        LineAnalyser lineAnalyser = new LineAnalyser();
+
 
         while(ThreadPool.getINSTANCE().isRunning()) {
             Task task;
@@ -61,6 +63,7 @@ public class NyaThread extends Thread {
     }
 
     public String[] search(Task t){
+        t.setLineAnalyser(lineAnalyser);
         String head = null;
         BufferedReader fr  = null;
         try {
@@ -119,14 +122,14 @@ public class NyaThread extends Thread {
             throw new NyaDicNotFoundException(t.getPath()).setHead(head);
         } catch (NyaPlusException e) {
             throw e.setHead(head);
-        } finally {
+        } catch (Exception e){
+        }finally{
             try {
                 fr.close();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
-
         return null;
     }
 

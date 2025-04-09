@@ -122,7 +122,7 @@ abstract class OperationAnalyser {
 
 
     public static String getResult(String expr) throws Exception {
-        if(expr.matches("\\d")|!expr.matches("((-?\\d+(\\.\\d+)?)[+\\-*%/^])*(-?\\d+(\\.\\d+)?)"))
+        if(expr.matches("\\d")|!expr.matches("((-?\\d+(\\.\\d+)?)[+\\-*%/^])+(-?\\d+(\\.\\d+)?)"))
             return null;
         String sufExpr = toSufExpr(expr);// 转为后缀表达式
 //        System.out.println("开始计算后缀表达式...");

@@ -41,12 +41,13 @@ var val = /%[^\s%]+%/,
         }
     }
 
-Prism.languages.nyaplus = {
+Prism.languages.NyaPlus = {
 
-    "head": {
+    head: {
         greedy: !0,
         pattern: /([\n\r]{2,}).*[\n\r]/,
-        inside: Prism.languages.regex
+        inside: Prism.languages.regex,
+
     },
 
     comment: {
@@ -55,16 +56,7 @@ Prism.languages.nyaplus = {
         greedy: !0
     },
 
-    function: func,
-    json:json_exp,
-    mathExp: math_exp,
-    variable:vars_exp,
     keyword:keywords,
-    end: {    //useless
-        pattern: /(?=\s)[\n\r]{2,}/,
-        lookbehind:!0,
-        greedy:!0
-    },
     loopHead: {
         pattern: /^循环:\S+/m,
         greedy:!0,
@@ -90,8 +82,19 @@ Prism.languages.nyaplus = {
             variable: vars_exp,
             function: func
         }
-
     },
+    jumpTag: {
+        pattern: /^:[^\n]+/m,
+        greedy:!0,
+        alias: "function"
+        // inside: {
+        //     function: /:/,
+        // }
+    },
+    function: func,
+    json:json_exp,
+    mathExp: math_exp,
+    variable:vars_exp,
     number: /(?<!\d)-?\d+(\.\d+)?/,
 
 }

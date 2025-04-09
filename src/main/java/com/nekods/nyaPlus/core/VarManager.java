@@ -1,8 +1,13 @@
 package com.nekods.nyaPlus.core;
 
-import com.nekods.nyaPlus.exceptions.NyaDefaultFieldReassignmentException;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSON;
+import com.nekods.nyaPlus.exceptions.NyaIllegalArgumentException;
 import com.nekods.nyaPlus.exceptions.NyaRenamingVarException;
 import com.nekods.nyaPlus.exceptions.NyaVariableNotFoundException;
+import com.nekods.nyaPlus.smallTools.Toolbox;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
@@ -23,7 +28,15 @@ public class VarManager {
     //算了，不单独检查了，如果出问题让用户自己处理吧，这不是啥大问题。
     //tm写文档写一半想起来的
 
+    //说着不写，还是写了（捂脸
+    private boolean nameCheck(String name) {
+        return !(name.contains("%")|name.contains(" "));
+    }
+
     public void setGlobalVar(String name, Object value) {
+        if (!nameCheck(name)) {
+            throw new NyaIllegalArgumentException("变量名称中不能出现\"%\"");
+        }
         if (this.Vars.containsKey(name)) {
             throw new NyaRenamingVarException(name);
         } else {
@@ -31,13 +44,26 @@ public class VarManager {
         }
     }
 
+    public void setGlobalVar(String name, String value) {
+        setGlobalVar(name, Toolbox.checkJson(value)[1]);
+    }
+
+
     public void setVar(String name, Object value) {
+        if (!nameCheck(name)) {
+            throw new NyaIllegalArgumentException("变量名称中不能出现\"%\"");
+        }
         if (globalVars.containsKey(name)) {
             throw new NyaRenamingVarException(name);
         } else {
             Vars.put(name, value);
         }
     }
+    public void setVar(String name, String value) {
+        setVar(name, Toolbox.checkJson(value)[1]);
+    }
+
+
 
     public Object getVar(String var) {
         Object svar;
@@ -56,7 +82,7 @@ public class VarManager {
     }
 
     public boolean hasVar(String var) {
-        return globalVars.containsKey(var) || this.Vars.containsKey(var);
+        return globalVars.containsKey(var) || Vars.containsKey(var);
     }
 
     public boolean hasVar(char var) {
@@ -67,8 +93,36 @@ public class VarManager {
         Object val = this.getVar(var);
         if (val.getClass() == String.class) {
             return (String)val;
+        } else if (val instanceof JSON)  {
+            return ((JSON) val).toJSONString();
+        }else {
+            return val.toString();
+        }
+    }
+    public JSONObject getJSONObj(String var) {
+        Object val = this.getVar(var);
+        if (val.getClass() == JSONObject.class) {
+            return (JSONObject)val;
         } else {
-            throw new RuntimeException(var + "不是字符串类型");
+            throw new NyaIllegalArgumentException("变量" + var + "不是JSON对象");
+        }
+    }
+
+    public JSONArray getJSONArr(String var) {
+        Object val = this.getVar(var);
+        if (val.getClass() == JSONArray.class) {
+            return (JSONArray) val;
+        } else {
+            throw new NyaIllegalArgumentException("变量" + var + "不是JSON数组");
+        }
+    }
+
+    public JSON getJSON(String var) {
+        Object val = this.getVar(var);
+        if (val instanceof JSON) {
+            return (JSON) val;
+        } else {
+            throw new NyaIllegalArgumentException("变量" + var + "不是JSON");
         }
     }
 }

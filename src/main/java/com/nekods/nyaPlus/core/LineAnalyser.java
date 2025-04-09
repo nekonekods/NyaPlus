@@ -1,19 +1,26 @@
 package com.nekods.nyaPlus.core;
 
+import com.alibaba.fastjson.JSON;
 import com.nekods.nyaPlus.exceptions.*;
 import com.nekods.nyaPlus.smallTools.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Stack;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.nekods.nyaPlus.core.VarManager.Methods;
 import static com.nekods.nyaPlus.smallTools.Toolbox.getStringByIndexes;
+//import static com.nekods.nyaPlus.smallTools.Toolbox.getStringByIndexes;
 
 public class LineAnalyser {
     private VarManager varManager;
     private Task task;
+    private int currentLine = 0;
+    private HashMap<String,Integer> jumpTags;
 
     public LineAnalyser() {
     }
@@ -116,8 +123,8 @@ public class LineAnalyser {
                 input.getChars(pair[0], pair[1], temp, 0);  //获取变量名
                 listGettingStream.add(new String(temp));
                 if (i == charsOfInput.length - 1/*表示这是最后一个字符，无需多言*/ || charsOfInput[i + 1] != '[') {  //这一段数组流的末尾了,进行一步替换
-                    String svar = varManager.getStringVar(String.valueOf(listname));  //先获取列表   todo 这一行有一滩狗屎，要改。
-                    String end = getStringByIndexes(svar, listGettingStream);  //再获取内容
+                    JSON varv = varManager.getJSON(String.valueOf(listname));  //先获取列表   todo 这一行有一滩狗屎，要改。
+                    String end = getStringByIndexes(varv, listGettingStream);  //再获取内容
                     input = new StringBuilder(input).replace(pair[1] - back_length + 1, pair[1] + 1, end).toString();   //替换
 
                     //以下都是交接
@@ -194,6 +201,7 @@ public class LineAnalyser {
     }
 
     private String replaceAndExecuteFunction(String input) {
+        /*
         //输入转成的char列表
         char[] charsOfInput = input.toCharArray();
 
@@ -251,17 +259,20 @@ public class LineAnalyser {
                                 throw new RuntimeException(e);
                             }
                         } else {
-                            Object[] params = Toolbox.splitStringByIndex(funcSplited[1],' ', c);
+                            Object[] params;
                             if (method.getParameterTypes()[0] == Task.class) {
-                                params = Toolbox.addToFirst(task, Toolbox.splitStringByIndex(funcSplited[1], ' ', c));
+                                params = Toolbox.addToFirst(task, Toolbox.splitStringByIndex(funcSplited[1], ' ', c-1));
                                 try {
                                     result = (String) method.invoke(null, params);
-                                } catch (IllegalArgumentException e) {
+                                } */
+        /*catch (IllegalArgumentException e) {
                                     throw new NyaIllegalArgumentNumException(funcSplited[0], c,params.length - 1);
-                                } catch (Exception e) {
+                                }*/
+        /* catch (Exception e) {
                                     throw new RuntimeException(e);
                                 }
                             } else {
+                                params = Toolbox.splitStringByIndex(funcSplited[1],' ', c);
                                 try {
                                     result = (String) method.invoke(null, params);
                                 } catch (IllegalArgumentException e) {
@@ -281,6 +292,77 @@ public class LineAnalyser {
             }
 
         }
+        return inputBuilder.toString();*/
+        StringBuilder inputBuilder = new StringBuilder(input);
+        Matcher m = Pattern.compile("\\$(.*?)\\$").matcher(input);
+
+        //最终多次写入的时候会产生偏移
+        int offset = 0;
+
+        while (m.find()) {
+            String funcWhole = m.group(1);
+            String[] funcSplited = funcWhole.split( " ", 2);
+            Method method = Methods.get(funcSplited[0]);
+
+            if (method == null) {
+                throw new NyaFunctionNotFoundException(funcSplited[0]);
+            }
+            int c = method.getParameterCount();
+
+
+            String result = null;
+            //这下面有大量重复代码和大坨try/catch块，先这么写
+            if (c == 0) {
+                try {
+                    result = (String) method.invoke(null);
+                    //三种情况分开处理，虽然看起来有些繁琐，但是就得这样写
+                } catch (IllegalArgumentException e) {
+                    throw new NyaIllegalArgumentNumException(funcSplited[0]);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                Object[] params;
+                if (method.getParameterTypes()[0] == Task.class) {
+                    params = Toolbox.addToFirst(task, funcSplited[1].split(" ", c - 1));
+                    try {
+                        result = (String) method.invoke(null, params);
+                    } catch (IllegalArgumentException e) {
+                        throw new NyaIllegalArgumentNumException(funcSplited[0], c, params.length - 1);
+                    } catch (InvocationTargetException e) {
+                        if (e.getCause() instanceof NyaPlusException npe) {
+                            throw npe;
+                        } else {
+                            throw new RuntimeException(e.getCause());
+                        }
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                } else {
+                    params = funcSplited[1].split(" ", c);
+                    try {
+                        result = (String) method.invoke(null, params);
+                    } catch (IllegalArgumentException e) {
+                        throw new NyaIllegalArgumentNumException(funcSplited[0], c, params.length);
+                    } catch (InvocationTargetException e) {
+                        if(e.getCause() instanceof NyaPlusException npe){
+                            throw npe;
+                        }else{
+                            throw new RuntimeException(e.getCause());
+                        }
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+            if (result == null) {
+                inputBuilder.delete(m.start()+offset, m.end()+offset);
+                offset -= m.end() - m.start();
+            } else {
+                inputBuilder.replace(m.start()+offset, m.end()+offset, result);
+                offset += result.length() - (m.end() - m.start());
+            }
+        }
         return inputBuilder.toString();
     }
 
@@ -293,6 +375,9 @@ public class LineAnalyser {
             line = this.replaceWithVars(line);
             line = this.replaceWithJSON(line);
             line = this.replaceCalculation(line);
+            //warn todo 这里有 bug ,当遇到只有一个数字的列表的时候，会在处理算式的时候被剥去括号
+            //reminder 解决方案：修改计算表达式的正则表达式，使其不匹配只包含一个数字的框框，就是不匹配如[-33.4]这种
+            //reminder 在这一点上与QR会存在不兼容，需注意。
             line = this.replaceAndExecuteFunction(line);
 
 
@@ -312,9 +397,8 @@ public class LineAnalyser {
 
         this.varManager = task.getVarManager();
         this.task = task;
-
-
-        int i = 0;
+        this.currentLine = 0;
+        this.jumpTags = new HashMap<>();
         try {
             int ifLevel = 0;
             int loopLevel = 0;     //用于循环条件不符合的快速掠过
@@ -322,10 +406,20 @@ public class LineAnalyser {
             String line;
             StringBuffer sb = new StringBuffer();
 
-
-            for (; i < lines.length; i++) {
+            for (int i = 0; i < lines.length; i++) {
                 line = lines[i];
-
+                if (line.startsWith(":")) {
+                    if (i >= lines.length - 1) {
+                        Controller.getOUTPUTTER().log("标签：%s将被掠过".formatted(line/*.substring(1)*/));
+                        //                                                           1/3这里的注释是看到底要不要存储冒号
+                        continue;
+                    }
+                    //          2/3这里的注释是看到底要不要存储冒号
+                    jumpTags.put(line/*.substring(1)*/, i);
+                }
+            }
+            for (; currentLine < lines.length; currentLine++) {
+                line = lines[currentLine];
 
                 if (line.startsWith("如果:")) {
                     if (ifLevel != 0) {  //不是第一次来这里了（在一个正在掠过的如果结构中）
@@ -344,7 +438,7 @@ public class LineAnalyser {
                         ifLevel++;
                     } else {
                         line = line.replaceFirst("循环:", "");
-                        LoopHead loopH = new LoopHead(line.split(";"), i, this);
+                        LoopHead loopH = new LoopHead(line.split(";"), currentLine, this);
                         loopH.init();
                         if (loopH.canRun()) {   //可以运行
                             loop_marks.push(loopH);
@@ -360,18 +454,19 @@ public class LineAnalyser {
                         LoopHead loopH = loop_marks.peek();
                         loopH.update();
                         if (loopH.canRun()) {
-                            i = loopH.getIndex();  //跳到最上面，循环头的下一行
+                            currentLine = loopH.getIndex();  //跳到最上面，循环头的下一行
                         } else {
                             loop_marks.pop();  //条件达成了，跑完了，弹出栈。
                         }
                     }
                 } else {
-
                     if (ifLevel != 0 || loopLevel != 0) {  //还在掠过,直接跳了
                     } else {
                         if (line.equals("返回")) {   //单独处理返回语句
                             finalSend(sb.toString());
                             return;
+                        }else if (line.startsWith(":")) {
+                            continue;
                         }
                         sb.append(analyze(line));
                     }
@@ -380,17 +475,26 @@ public class LineAnalyser {
             }
             finalSend(sb.toString());
         } catch (NyaPlusException e) {
-            throw e.setLine(i + 1);
+            throw e.setLine(currentLine + 1);
         }
     }
 
     /**
      * 处理结束之后可以统一通过这里输出
+     *
      * @param s 要输出的内容
-     * */
-    private void finalSend(String s){
+     */
+    private void finalSend(String s) {
         Controller.getOUTPUTTER().send(s
                 .replace("\\n", "\n")
-                .replace("\\r", "\r"), task);  //先这么写着
+                .replace("\\s"," ")
+                .replace("\\t","\t"), task);  //先这么写着
+    }
+    public void jump(String tag){
+        if (jumpTags.containsKey(tag))
+            //                         3/3这里的注释是看到底要不要存储冒号
+            currentLine = jumpTags.get(tag/*.substring(1)*/);
+        else
+            throw new NyaNoSuchTagException(tag);
     }
 }

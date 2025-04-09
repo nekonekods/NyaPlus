@@ -53,14 +53,13 @@ public abstract class BoolExprAnalyser {
         if(s == null) return 0;
         switch(s) {
             case '(':return 1;
+            case '!': return 3;  // 新增非运算符，优先级最高
             case '&':
             case '|':return 2;
             default:break;
         }
         return -1;
     }
-
-
 
     private static String toSufExpr(String expr){
 //        System.out.println("将"+expr+"解析为后缀表达式...");
@@ -71,7 +70,7 @@ public abstract class BoolExprAnalyser {
         operator.push(null);//在栈顶压人一个null，配合它的优先级，目的是减少下面程序的判断
         /* 将expr打散分散成运算数和运算符 */
         char[] expCharSet = expr.toCharArray();
-        final Character[] ops = {'&','|','(',')'};
+        final Character[] ops = {'&','|','!','(',')'};  // 添加非运算符
         for(Character temp : expCharSet){
             if (Toolbox.setHas(ops,temp)) { //是运算符
                 if (temp.equals('(')) { //遇到左括号，直接压栈
@@ -81,7 +80,7 @@ public abstract class BoolExprAnalyser {
                     Character topItem = null;
                     while (!(topItem = operator.pop()).equals('(')) {
 //                        System.out.println(topItem+"弹栈");
-                        sufExpr.append(topItem+" ");
+                        sufExpr.append(topItem/*+" "*/);
 //                        System.out.println("输出:"+sufExpr);
                     }
                 } else {//遇到运算符，比较栈顶符号，若该运算符优先级大于栈顶，直接压栈；若小于栈顶，弹栈输出直到大于栈顶，然后将改运算符压栈。
@@ -115,16 +114,20 @@ public abstract class BoolExprAnalyser {
         Stack<Character> number = new Stack<>();
         /* 这个正则匹配每个数字和符号 */
         char[] expCharSet = sufExpr.toCharArray();
-        Character[] ops = {'&','|'};
+        Character[] ops = {'&','|','!'};
         for(Character temp : expCharSet) {
             if (Toolbox.setHas(ops,temp)) {// 遇到运算符，将最后两个数字取出，进行该运算，将结果再放入容器
-//                System.out.println("符号" + temp);
-                char a1 = number.pop();
-                char a2 = number.pop();
-                char res = boolCal(a2, a1, temp);
-                number.push(res);
+                if (temp == '!') {  // 处理非运算
+                    char a = number.pop();
+                    number.push(a == 't' ? 'f' : 't');
+                }else{
+                    //        System.out.println("符号" + temp);
+                    char a1 = number.pop();
+                    char a2 = number.pop();
+                    char res = boolCal(a2, a1, temp);
+                    number.push(res);
 //                System.out.println(a2 + "和" + a1 + "弹栈，并计算" + a2 + temp + a1);
-//                System.out.println("数字栈：" + number);
+                }
             } else {// 遇到数字直接放入容器
                 number.push(temp);
 //                System.out.println("数字栈：" + number);

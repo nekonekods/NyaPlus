@@ -1,6 +1,7 @@
 
 package com.nekods.nyaPlus.smallTools;
 
+import com.nekods.nyaPlus.core.LineAnalyser;
 import com.nekods.nyaPlus.core.VarManager;
 
 public class Task<T> {
@@ -12,6 +13,9 @@ public class Task<T> {
 
     //等待注入的VM
     private VarManager varManager;
+
+    //延迟注入的LineAnalyzer
+    private LineAnalyser lineAnalyser;
 
     //附带的信息
     private T info;
@@ -41,4 +45,13 @@ public class Task<T> {
     public T getInfo() {
         return this.info;
     }
+
+    public LineAnalyser getLineAnalyser() {
+        return lineAnalyser;
+    }
+
+    public void setLineAnalyser(LineAnalyser lineAnalyser) {
+        this.lineAnalyser = lineAnalyser;
+    }
+
 }

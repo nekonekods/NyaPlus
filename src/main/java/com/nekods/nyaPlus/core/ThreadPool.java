@@ -74,4 +74,23 @@ public class ThreadPool {
             this.taskQueue.notifyAll();
         }
     }
+
+    public int getPoolSize() {
+        return poolSize;
+    }
+
+    public void setPoolSize(int poolSize) throws InterruptedException {
+        this.poolSize = poolSize;
+        shutdown();
+        int i;
+        for(i = 0; i < threads.length; ++i) {
+            this.threads[i].join();
+        }
+        this.threads = new Thread[poolSize];
+        for(i = 0; i < poolSize; ++i) {
+            this.threads[i] = new NyaThread();
+            this.threads[i].start();
+        }
+    }
+
 }

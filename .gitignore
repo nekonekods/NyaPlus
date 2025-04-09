@@ -5,6 +5,8 @@ target/
 
 pic/
 
+src/main/java/com/nekods/nyaPlus/test/testMain_t.java
+
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
